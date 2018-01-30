@@ -11,6 +11,7 @@ var rel;
 var smoke;
 var ageValDiv;
 var relValDiv;
+var submitDiv;
 var jsonData = [];
 
 window.onload = function(e) {
@@ -23,6 +24,9 @@ window.onload = function(e) {
     relValDiv.style.color = 'red';
     insertAfter(relValDiv, relDiv);
     relValDiv.innerHTML = '';
+    submitDiv = document.createElement("div");
+    submitDiv.style.color = 'red';
+    insertAfter(submitDiv, form);
 }
 ageElem.onchange = function(e) {
     age = this.value.trim();
@@ -42,6 +46,8 @@ form.onsubmit = function(e) {
     var preTag = document.getElementsByTagName('pre')[0];
     preTag.innerHTML = JSON.stringify(jsonData, null, ' ');
     preTag.style = 'display:block';
+    submitDiv.innerHTML = jsonData.length == 0 ? 'Empty List' : '';
+    
 }
 addButton.onclick = function(e) {
     e.preventDefault();
@@ -68,11 +74,15 @@ addButton.onclick = function(e) {
 }
 
 function buildJson(age, rel, smoke) {
-    jsonData.push({
-            age: age,
-            relationship: rel,
-            smoker: smoke
-        });
+    var root = document.getElementsByClassName('household')[0];
+    jsonData.length = 0;
+    jsonData = Array.from(root.childNodes).map(function(node) {
+        return {
+            age: node.childNodes[0].childNodes[0].childNodes[1].innerText.trim(), //sub 1 to skip 'text' node
+            relationship: node.childNodes[0].childNodes[1].childNodes[1].innerText.trim(),
+            smoker: node.childNodes[0].childNodes[2].childNodes[1].innerText.trim()
+        }
+    });
 }
 
 function addHTML(age, rel, smoke) {
@@ -80,11 +90,15 @@ function addHTML(age, rel, smoke) {
     var entryDivEl = document.createElement('div');
     
     var ageLabelEl = document.createElement('label');
-    ageLabelEl.innerHTML = 'Age: ' + age + '<BR />';
+    var ageSpanEl = document.createElement('span');
+    ageSpanEl.innerHTML = age;
+    ageLabelEl.innerHTML = 'Age: ';    
+    ageLabelEl.appendChild(ageSpanEl);
+    ageLabelEl.appendChild(document.createElement('br'));
     var relLabelEl = document.createElement('label');
-    relLabelEl.innerHTML = 'Relationship: ' + rel + '<BR />';
+    relLabelEl.innerHTML = 'Relationship: <span>' + rel + '</span><BR />';
     var smkLabelEl = document.createElement('label');
-    smkLabelEl.innerHTML = 'Smoker: ' + smoke + '<BR />';    
+    smkLabelEl.innerHTML = 'Smoker: <span>' + smoke + '</span><BR />';    
     entryDivEl.appendChild(ageLabelEl);
     entryDivEl.appendChild(relLabelEl);
     entryDivEl.appendChild(smkLabelEl);
@@ -98,7 +112,6 @@ function addHTML(age, rel, smoke) {
     entryDivEl.appendChild(breakEl);
     list.appendChild(element).appendChild(entryDivEl);
 }
-
 function isValidAge(age) {
     return !isNaN(parseInt(age)) && isFinite(age) && age > 0;
 }
